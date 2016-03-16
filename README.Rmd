@@ -18,17 +18,121 @@ Across the United States, which types of events have the greatest economic conse
 library(lubridate)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 ```
 
 ```{r load, cache=TRUE}
 data <- read.csv("repdata-data-StormData.csv.bz2")
 ```
 
+### Data Quality
+
+####Event Type Data Quality
 ```{r }
-dim(data)
+sum(is.na(data$EVTYPE))
 ```
 
-There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data. You cannot do any preprocessing outside the document. If preprocessing is time-consuming you may consider using the 𝚌𝚊𝚌𝚑𝚎 = 𝚃𝚁𝚄𝙴 option for certain code chunks.
+This series contains no NA values in passes the data quality criteria.
+
+####Injury/Fatality Data Quality
+```{r }
+sum(is.na(data$FATALITIES))
+sum(is.na(data$INJURIES))
+```
+
+These series contains no NA values in passes the data quality criteria.
+
+####Property Damage Data Quality
+```{r }
+sum(is.na(data$PROPDMG))
+table(data$PROPDMGEXP)
+```
+
+The PROPDMG series contains no NA values in passes the data quality criteria.
+The PROPDMGEXP series should only contain K(Thousands), M(Millions) and B(Billions) values. 
+
+
+####Crop Damage Data Quality
+```{r }
+sum(is.na(data$CROPDMG))
+table(data$CROPDMGEXP)
+```
+
+The CROPDMG series contains no NA values in passes the data quality criteria.
+The CROPDMGEXP series should only contain K(Thousands), M(Millions) and B(Billions) values. 
+
+### Data Cleanup and Enhancement
+
+I will be replacing all values in PROPDMGEXP and CROPDMGEXP that fall outside of this range (K,M,B) with the most populous value, namely K. I am assuming the American definition of Billion which is M*1000. I further correct for possible capitlisation descrepancies.
+
+```{r cleanup}
+m <- function(exp) {
+  ifelse(exp %in% c("B","b"),1000000*1000,ifelse(exp %in% c("M","m"),1000000,1000))  
+}
+
+data <- data %>% mutate(ABSPROPDMG = PROPDMG * m(PROPDMGEXP), ABSCROPDMG = CROPDMG * m(CROPDMGEXP))
+
+```
+
+### Data Aggregation
+
+Please note that in the aggregate I normalise the damage amount to billions by deviding the total amouns by one billion. I apply this normalisation here to reduce roudning effects. I further transform the data to tidy data to make plotting an d further analysis easier.
+
+```{r aggregate}
+data <- data %>%
+        group_by(EVTYPE) %>%
+        summarize( TOT_FATALITIES=sum(FATALITIES)
+                  ,TOT_INJURIES=sum(INJURIES)
+                  ,TOTAL_HEALTH=TOT_FATALITIES+TOT_INJURIES
+                  ,TOT_PROPDMG=sum(ABSPROPDMG)/100000000
+                  ,TOT_CROPDMG=sum(ABSCROPDMG)/100000000
+                  ,TOTAL_DAMAGE=TOT_PROPDMG+TOT_CROPDMG
+                  )
+
+health <- data %>% 
+          filter(TOTAL_HEALTH>0) %>% 
+          select(EVTYPE,TOT_FATALITIES,TOT_INJURIES,TOTAL_HEALTH) %>%
+          arrange(desc(TOTAL_HEALTH)) %>%
+          top_n(10,TOTAL_HEALTH) %>%
+          gather(TYPE,VALUE,TOT_FATALITIES:TOTAL_HEALTH) %>% 
+          mutate(EVTYPE=factor(EVTYPE),TYPE=factor(TYPE,labels=c("Total","Fatalities","Injuries")))
+
+#health %>% filter(EVTYPE == "TORNADO")
+health
+
+
+damage <- data %>% 
+          filter(TOTAL_DAMAGE>0) %>% 
+          select(EVTYPE,TOT_PROPDMG,TOT_CROPDMG,TOTAL_DAMAGE) %>%
+          arrange(desc(TOTAL_DAMAGE)) %>%
+          top_n(10,TOTAL_DAMAGE) %>%
+          gather(TYPE,VALUE,TOT_PROPDMG,TOT_PROPDMG:TOTAL_DAMAGE) %>% 
+          mutate(EVTYPE=factor(EVTYPE),TYPE=factor(TYPE,labels=c("Total","Crop Damage","Property Damage")))
+
+damage
+```
+
+## Exploratory Graphs
+### Health Impact by Event Type
+```{r graph_health}
+ggplot(health,aes(reorder(EVTYPE,-VALUE),VALUE,color=TYPE,group=TYPE)) + 
+  geom_line() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Event Type") +
+  ylab("Event Impact - Individuals")
+
+```
+
+### Damage by Event Type
+```{r graph_damage}
+ggplot(damage,aes(reorder(EVTYPE,-VALUE),VALUE,color=TYPE,group=TYPE)) + 
+  geom_line() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Event Type") +
+  ylab("Event Impact - Billion $")
+```
 
 ## Results
 At least one but not more than 3 figures
