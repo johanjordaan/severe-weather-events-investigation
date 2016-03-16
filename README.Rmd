@@ -1,5 +1,5 @@
 ---
-title: "Servere Wearther Events Investigation"
+title: "Severe Weather Events Investigation"
 author: "Johan Jordaan"
 date: "16 March 2016"
 output: 
@@ -7,26 +7,31 @@ output:
     keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+## Synopsis
+Synopsis: Immediately after the title, there should be a synopsis which describes and summarizes your analysis in at most 10 complete sentences.
+
+Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?
+Across the United States, which types of events have the greatest economic consequences?
+
+## Data Processing
+```{r warning=FALSE,message=FALSE}
+library(lubridate)
+library(dplyr)
+library(ggplot2)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r load, cache=TRUE}
+data <- read.csv("repdata-data-StormData.csv.bz2")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r }
+dim(data)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data. You cannot do any preprocessing outside the document. If preprocessing is time-consuming you may consider using the 𝚌𝚊𝚌𝚑𝚎 = 𝚃𝚁𝚄𝙴 option for certain code chunks.
+
+## Results
+At least one but not more than 3 figures
+
+
+

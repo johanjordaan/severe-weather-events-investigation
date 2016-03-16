@@ -1,34 +1,39 @@
-# Servere Wearther Events Investigation
+# Severe Weather Events Investigation
 Johan Jordaan  
 16 March 2016  
 
+## Synopsis
+Synopsis: Immediately after the title, there should be a synopsis which describes and summarizes your analysis in at most 10 complete sentences.
 
+Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?
+Across the United States, which types of events have the greatest economic consequences?
 
-## R Markdown
+## Data Processing
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```r
+library(lubridate)
+library(dplyr)
+library(ggplot2)
+```
 
 
 ```r
-summary(cars)
+data <- read.csv("repdata-data-StormData.csv.bz2")
+```
+
+
+```r
+dim(data)
 ```
 
 ```
-##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00
+## [1] 902297     37
 ```
 
-## Including Plots
+There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data. You cannot do any preprocessing outside the document. If preprocessing is time-consuming you may consider using the 𝚌𝚊𝚌𝚑𝚎 = 𝚃𝚁𝚄𝙴 option for certain code chunks.
 
-You can also embed plots, for example:
+## Results
+At least one but not more than 3 figures
 
-![](README_files/figure-html/pressure-1.png)
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
