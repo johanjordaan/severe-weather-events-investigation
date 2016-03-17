@@ -5,7 +5,9 @@ date: "16 March 2016"
 subtitle: "... a short investigation of the economic and population health impact of severe weather events in the United States ..."
 output: 
   html_document:
+    toc: true
     keep_md: true
+    theme: united
 ---
 
 ## Synopsis
