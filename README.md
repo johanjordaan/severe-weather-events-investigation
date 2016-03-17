@@ -3,15 +3,19 @@ Johan Jordaan
 16 March 2016  
 
 ## Synopsis
-Synopsis: Immediately after the title, there should be a synopsis which describes and summarizes your analysis in at most 10 complete sentences.
+This investigation aimed to answer the following two questions:
 
-Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?
-Across the United States, which types of events have the greatest economic consequences?
+1. Across the United States, which types of events are most harmful with respect to population health?
+2. Across the United States, which types of events have the greatest economic consequences?
+
+The data used comes from the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database and can be found [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+
+## Assumptions 
+I assumed the American definition for a billion, which is a thousand million.
 
 ## Data Processing
 
 ```r
-library(lubridate)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
@@ -23,8 +27,11 @@ data <- read.csv("repdata-data-StormData.csv.bz2")
 ```
 
 ### Data Quality
+The data quality was quite high in my oppinion with only the PROPDMGEXP and CROPDMGEXP variables needing some kind of cleanup.
 
 ####Event Type Data Quality
+The EVTYPE variable contained no NA values and required no cleanup.
+
 
 ```r
 sum(is.na(data$EVTYPE))
@@ -34,9 +41,10 @@ sum(is.na(data$EVTYPE))
 ## [1] 0
 ```
 
-This series contains no NA values in passes the data quality criteria.
 
 ####Injury/Fatality Data Quality
+The FATALITIES and INJURIES variables contained no NA values and required no cleanup.
+
 
 ```r
 sum(is.na(data$FATALITIES))
@@ -54,7 +62,6 @@ sum(is.na(data$INJURIES))
 ## [1] 0
 ```
 
-These series contains no NA values in passes the data quality criteria.
 
 ####Property Damage Data Quality
 
@@ -65,6 +72,9 @@ sum(is.na(data$PROPDMG))
 ```
 ## [1] 0
 ```
+
+The PROPDMG variable contained no NA values and required no cleanup.
+
 
 ```r
 table(data$PROPDMGEXP)
@@ -78,9 +88,7 @@ table(data$PROPDMGEXP)
 ##      5      1      8     40      6 424665  11330      1      7
 ```
 
-The PROPDMG series contains no NA values in passes the data quality criteria.
-The PROPDMGEXP series should only contain K(Thousands), M(Millions) and B(Billions) values. 
-
+The PROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
 
 ####Crop Damage Data Quality
 
@@ -92,6 +100,9 @@ sum(is.na(data$CROPDMG))
 ## [1] 0
 ```
 
+The CROPDMG variable contained no NA values and required no cleanup.
+
+
 ```r
 table(data$CROPDMGEXP)
 ```
@@ -102,12 +113,11 @@ table(data$CROPDMGEXP)
 ## 618413     19      1      7      9 281832   1994     21      1
 ```
 
-The CROPDMG series contains no NA values in passes the data quality criteria.
-The CROPDMGEXP series should only contain K(Thousands), M(Millions) and B(Billions) values. 
+The CROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
 
 ### Data Cleanup and Enhancement
 
-I will be replacing all values in PROPDMGEXP and CROPDMGEXP that fall outside of this range (K,M,B) with the most populous value, namely K. I am assuming the American definition of Billion which is M*1000. I further correct for possible capitlisation descrepancies.
+I replaced all the values in the PROPDMGEXP and CROPDMGEXP variables that fell outside of the valid range (K,M,B) with the most populous value, namely K.I further compensated for possible capitlisation discrepancies.
 
 
 ```r
@@ -120,10 +130,12 @@ data <- data %>% mutate(ABSPROPDMG = PROPDMG * m(PROPDMGEXP), ABSCROPDMG = CROPD
 
 ### Data Aggregation
 
-Please note that in the aggregate I normalise the damage amount to billions by deviding the total amouns by one billion. I apply this normalisation here to reduce roudning effects. I further transform the data to tidy data to make plotting an d further analysis easier.
+In the aggregate I normalised the damage amount to billions by deviding the total amounts by one billion. I applied this normalisation here to reduce rounding effects. I further transformed the data to 'tidy data' to make plotting and further analysis easier.
 
 
 ```r
+top <- 10
+
 data <- data %>%
         group_by(EVTYPE) %>%
         summarize( TOT_FATALITIES=sum(FATALITIES)
@@ -138,11 +150,23 @@ health <- data %>%
           filter(TOTAL_HEALTH>0) %>% 
           select(EVTYPE,TOT_FATALITIES,TOT_INJURIES,TOTAL_HEALTH) %>%
           arrange(desc(TOTAL_HEALTH)) %>%
-          top_n(10,TOTAL_HEALTH) %>%
+          top_n(top,TOTAL_HEALTH) %>%
           gather(TYPE,VALUE,TOT_FATALITIES:TOTAL_HEALTH) %>% 
           mutate(EVTYPE=factor(EVTYPE),TYPE=factor(TYPE,labels=c("Total","Fatalities","Injuries")))
 
-#health %>% filter(EVTYPE == "TORNADO")
+damage <- data %>% 
+          filter(TOTAL_DAMAGE>0) %>% 
+          select(EVTYPE,TOT_PROPDMG,TOT_CROPDMG,TOTAL_DAMAGE) %>%
+          arrange(desc(TOTAL_DAMAGE)) %>%
+          top_n(top,TOTAL_DAMAGE) %>%
+          gather(TYPE,VALUE,TOT_PROPDMG,TOT_PROPDMG:TOTAL_DAMAGE) %>% 
+          mutate(EVTYPE=factor(EVTYPE),TYPE=factor(TYPE,labels=c("Total","Crop Damage","Property Damage")))
+```
+
+Note that I only selected the top ``10`` TOTAL_DAMAGE and TOTAL_HEALTH elements in the list. 
+
+
+```r
 health
 ```
 
@@ -165,14 +189,6 @@ health
 ```
 
 ```r
-damage <- data %>% 
-          filter(TOTAL_DAMAGE>0) %>% 
-          select(EVTYPE,TOT_PROPDMG,TOT_CROPDMG,TOTAL_DAMAGE) %>%
-          arrange(desc(TOTAL_DAMAGE)) %>%
-          top_n(10,TOTAL_DAMAGE) %>%
-          gather(TYPE,VALUE,TOT_PROPDMG,TOT_PROPDMG:TOTAL_DAMAGE) %>% 
-          mutate(EVTYPE=factor(EVTYPE),TYPE=factor(TYPE,labels=c("Total","Crop Damage","Property Damage")))
-
 damage
 ```
 
@@ -203,7 +219,7 @@ ggplot(health,aes(reorder(EVTYPE,-VALUE),VALUE,color=TYPE,group=TYPE)) +
   geom_point() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   xlab("Event Type") +
-  ylab("Event Impact - Individuals")
+  ylab("Event Impact - Individuals") 
 ```
 
 ![](README_files/figure-html/graph_health-1.png)
@@ -216,13 +232,26 @@ ggplot(damage,aes(reorder(EVTYPE,-VALUE),VALUE,color=TYPE,group=TYPE)) +
   geom_point() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   xlab("Event Type") +
-  ylab("Event Impact - Billion $")
+  ylab("Event Impact - Billion $") 
 ```
 
 ![](README_files/figure-html/graph_damage-1.png)
 
 ## Results
-At least one but not more than 3 figures
+
+The goal of the investigation was to answer these two questions:
+
+1. Across the United States, which types of events are most harmful with respect to population health?
+2. Across the United States, which types of events have the greatest economic consequences?
+
+The answers to these two questions given the assumptions and the data analysis are:
+
+1. Accross the United States, Hurricanes are the most harmfull with respect to population health.
+2. Accross the United States, Floods have the greatest economic consequences.
+
+
+## Further Work
+
 
 
 
