@@ -2,12 +2,13 @@
 title: "Severe Weather Events Investigation"
 author: "Johan Jordaan"
 date: "16 March 2016"
-subtitle: "... a short investigation of the economic and population health impact of severe weather events in the United States ..."
-output: 
+output:
   html_document:
-    toc: true
-    keep_md: true
+    keep_md: yes
     theme: united
+    toc: yes
+subtitle: '... a brief investigation of the economic and population health impact
+  of severe weather events in the United States ...'
 ---
 
 ## Synopsis
@@ -16,16 +17,16 @@ This investigation aimed to answer the following two questions:
 1. Across the United States, which types of events are most harmful with respect to population health?
 2. Across the United States, which types of events have the greatest economic consequences?
 
-The data used comes from the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database and can be found [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+The data was sourced from the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database and can be found [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2).
 
 ## Assumptions 
-I made some assumption in the investigation in order to answer the questions. The following list enumerates these assumptions:
+I made some assumptions in the investigation in order to answer the above two questions. The following list enumerates these assumptions:
 
 * I assumed the American definition for a billion, which is a thousand million.
-* I assumed that 'harmful with respect to population health' is measured by number of injuries and fatalities. 
-* I assumed that 'have the greatest economic consequences' is measured by the damage to propery and crops and not include harmful efects on population healt.
-* I have excluded any kind of normilisation of values to account for inflation.
-* The analsysis has been done on the aggregate data in the database stretching from 1950 to 2011. 
+* I assumed that 'harmful with respect to population health' is measured by the number of injuries and fatalities. 
+* I assumed that 'have the greatest economic consequences' is measured by the damage to property and crops and does not include harmful effects on population health.
+* I have excluded any kind of normalisation to account for inflation.
+* The analysis was done on the aggregate data in the database that stretched from 1950 to 2011. 
 
 ## Data Processing
 ```{r warning=FALSE,message=FALSE}
@@ -39,7 +40,7 @@ data <- read.csv("repdata-data-StormData.csv.bz2")
 ```
 
 ### Data Quality
-The data quality was quite high in my oppinion with only the PROPDMGEXP and CROPDMGEXP variables needing some kind of cleanup.
+The data quality was quite high in my opinion with only the PROPDMGEXP and CROPDMGEXP variables needing some kind of cleanup.
 
 ####Event Type Data Quality
 The EVTYPE variable contained no NA values and required no cleanup.
@@ -68,7 +69,7 @@ sum(is.na(data$PROPDMG))
 sum(data$PROPDMG<0)
 ```
 
-The PROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
+The PROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series needed to be cleaned.
 
 ```{r }
 table(data$PROPDMGEXP)
@@ -82,7 +83,7 @@ sum(is.na(data$CROPDMG))
 sum(data$CROPDMG<0)
 ```
 
-The CROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
+The CROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series needed to be cleaned.
 
 ```{r }
 table(data$CROPDMGEXP)
@@ -90,7 +91,9 @@ table(data$CROPDMGEXP)
 
 ### Data Cleanup and Enhancement
 
-I replaced all the values in the PROPDMGEXP and CROPDMGEXP variables that fell outside of the valid range (K,M,B) with the most populous value, namely K.I further compensated for possible capitlisation discrepancies.
+I replaced all the values in the PROPDMGEXP and CROPDMGEXP variables that fell outside of the valid range (K,M,B) with the most populous value, namely K. 
+
+I further compensated for possible capitalisation discrepancies.
 
 ```{r cleanup}
 m <- function(exp) {
@@ -103,7 +106,7 @@ data <- data %>% mutate(ABSPROPDMG = PROPDMG * m(PROPDMGEXP), ABSCROPDMG = CROPD
 
 ### Data Aggregation
 
-In the aggregate I normalised the damage amount to billions by deviding the total amounts by one billion. I applied this normalisation here to reduce rounding effects. I further transformed the data to 'tidy data' to make plotting and further analysis easier.
+In the aggregate I normalised the damage amount to billions by dividing the total amounts by one billion. I applied this normalisation here, and not earlier, to reduce rounding effects. I further transformed the data to 'tidy data' to make plotting and subsequent analysis easier.
 
 ```{r aggregate}
 top <- 10
@@ -167,28 +170,28 @@ ggplot(damage,aes(reorder(EVTYPE,-VALUE),VALUE,color=TYPE,group=TYPE)) +
 
 ## Results
 
-The goal of the investigation was to answer these two questions:
+In summary, the goal of the investigation was to answer these two questions:
 
 1. Across the United States, which types of events are most harmful with respect to population health?
 2. Across the United States, which types of events have the greatest economic consequences?
 
-The answers to these two questions given the assumptions and the data analysis are:
+The answers to these two questions given my assumptions and analysis are:
 
-1. Accross the United States, Hurricanes are the most harmfull with respect to population health.
-2. Accross the United States, Floods have the greatest economic consequences.
+1. Accross the United States, *tornados* are the most harmfull with respect to population health.
+2. Accross the United States, *floods* have the greatest economic consequences.
 
 
 ## Further Work
 
-The investigation was constraigned by the requirements and time limits. In doing this investigation the following open questions ocurred to me and might be interesting engigh for furure analisies following on from this work:
+Unfortunately this investigation was constrained by the requirements and time limits. In doing this investigation the following open questions ocurred to me and might be interesting enough to warrant future analisis:
 
-1. What is the progression over time for the events with the highest impact. We know that hurricanes has the higest impact on population health, but has this always been the case?
-2. Would the results of this study be diffrent if the values are infation/market adjusted?
-3. Is there any events that in aggregate terms has less impact but has a higher average and accure more frequently. This might indicate 'low hanging fruit' for event preperation.
-4. Is there a way to quantify injuries and fatalities sothat they can be added to the economic loss of property and crop in order to get a better economic impact.
-5. Is the impact of events localised in terms of economic and population healt impact?
+1. What is the progression over time for the events with the highest impact? We know that tornados have the highest impact on population health, but has this always been the case?
+2. Would the results of this study be different if the values are inflation/market adjusted?
+3. Are there any events that in aggregate have less impact but have a higher average and occur more frequently? This might indicate 'low hanging fruit' for event preparation.
+4. How can we quantify injuries and fatalities so that they can be added to the economic loss of property and crops, in order to get a better economic impact?
+5. Is the impact of events localised in terms of economic and population health impact?
 
-These are but a few of the questions that popped into my head while doing this investigation. I am looking forward to answering some of the above questions and in ansering them generating a whole herd of new questions.
+These are but a few of the questions that popped into my mind while doing this investigation. I am looking forward to answering some of the above questions, and in answering them generating a whole bunch of new questions.
 
 
 

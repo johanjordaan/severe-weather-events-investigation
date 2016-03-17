@@ -63,7 +63,7 @@ img {
 
 <div id="header">
 <h1 class="title">Severe Weather Events Investigation</h1>
-<h3 class="subtitle"><em>… a short investigation of the economic and population health impact of severe weather events in the United States …</em></h3>
+<h3 class="subtitle"><em>… a brief investigation of the economic and population health impact of severe weather events in the United States …</em></h3>
 <h4 class="author"><em>Johan Jordaan</em></h4>
 <h4 class="date"><em>16 March 2016</em></h4>
 </div>
@@ -93,17 +93,17 @@ img {
 <li>Across the United States, which types of events are most harmful with respect to population health?</li>
 <li>Across the United States, which types of events have the greatest economic consequences?</li>
 </ol>
-<p>The data used comes from the U.S. National Oceanic and Atmospheric Administration’s (NOAA) storm database and can be found <a href="https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2">here</a></p>
+<p>The data was sourced from the U.S. National Oceanic and Atmospheric Administration’s (NOAA) storm database and can be found <a href="https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2">here</a>.</p>
 </div>
 <div id="assumptions" class="section level2">
 <h2>Assumptions</h2>
-<p>I made some assumption in the investigation in order to answer the questions. The following list enumerates these assumptions:</p>
+<p>I made some assumptions in the investigation in order to answer the above two questions. The following list enumerates these assumptions:</p>
 <ul>
 <li>I assumed the American definition for a billion, which is a thousand million.</li>
-<li>I assumed that ‘harmful with respect to population health’ is measured by number of injuries and fatalities.</li>
-<li>I assumed that ‘have the greatest economic consequences’ is measured by the damage to propery and crops and not include harmful efects on population healt.</li>
-<li>I have excluded any kind of normilisation of values to account for inflation.</li>
-<li>The analsysis has been done on the aggregate data in the database stretching from 1950 to 2011.</li>
+<li>I assumed that ‘harmful with respect to population health’ is measured by the number of injuries and fatalities.</li>
+<li>I assumed that ‘have the greatest economic consequences’ is measured by the damage to property and crops and does not include harmful effects on population health.</li>
+<li>I have excluded any kind of normalisation to account for inflation.</li>
+<li>The analysis was done on the aggregate data in the database that stretched from 1950 to 2011.</li>
 </ul>
 </div>
 <div id="data-processing" class="section level2">
@@ -114,7 +114,7 @@ library(tidyr)</code></pre>
 <pre class="r"><code>data &lt;- read.csv(&quot;repdata-data-StormData.csv.bz2&quot;)</code></pre>
 <div id="data-quality" class="section level3">
 <h3>Data Quality</h3>
-<p>The data quality was quite high in my oppinion with only the PROPDMGEXP and CROPDMGEXP variables needing some kind of cleanup.</p>
+<p>The data quality was quite high in my opinion with only the PROPDMGEXP and CROPDMGEXP variables needing some kind of cleanup.</p>
 <div id="event-type-data-quality" class="section level4">
 <h4>Event Type Data Quality</h4>
 <p>The EVTYPE variable contained no NA values and required no cleanup.</p>
@@ -140,7 +140,7 @@ library(tidyr)</code></pre>
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>sum(data$PROPDMG&lt;0)</code></pre>
 <pre><code>## [1] 0</code></pre>
-<p>The PROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.</p>
+<p>The PROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series needed to be cleaned.</p>
 <pre class="r"><code>table(data$PROPDMGEXP)</code></pre>
 <pre><code>## 
 ##             +      -      0      1      2      3      4      5      6 
@@ -155,7 +155,7 @@ library(tidyr)</code></pre>
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>sum(data$CROPDMG&lt;0)</code></pre>
 <pre><code>## [1] 0</code></pre>
-<p>The CROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.</p>
+<p>The CROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series needed to be cleaned.</p>
 <pre class="r"><code>table(data$CROPDMGEXP)</code></pre>
 <pre><code>## 
 ##             0      2      ?      B      K      M      k      m 
@@ -164,7 +164,8 @@ library(tidyr)</code></pre>
 </div>
 <div id="data-cleanup-and-enhancement" class="section level3">
 <h3>Data Cleanup and Enhancement</h3>
-<p>I replaced all the values in the PROPDMGEXP and CROPDMGEXP variables that fell outside of the valid range (K,M,B) with the most populous value, namely K.I further compensated for possible capitlisation discrepancies.</p>
+<p>I replaced all the values in the PROPDMGEXP and CROPDMGEXP variables that fell outside of the valid range (K,M,B) with the most populous value, namely K.</p>
+<p>I further compensated for possible capitalisation discrepancies.</p>
 <pre class="r"><code>m &lt;- function(exp) {
   ifelse(exp %in% c(&quot;B&quot;,&quot;b&quot;),1000000*1000,ifelse(exp %in% c(&quot;M&quot;,&quot;m&quot;),1000000,1000))  
 }
@@ -173,7 +174,7 @@ data &lt;- data %&gt;% mutate(ABSPROPDMG = PROPDMG * m(PROPDMGEXP), ABSCROPDMG =
 </div>
 <div id="data-aggregation" class="section level3">
 <h3>Data Aggregation</h3>
-<p>In the aggregate I normalised the damage amount to billions by deviding the total amounts by one billion. I applied this normalisation here to reduce rounding effects. I further transformed the data to ‘tidy data’ to make plotting and further analysis easier.</p>
+<p>In the aggregate I normalised the damage amount to billions by dividing the total amounts by one billion. I applied this normalisation here, and not earlier, to reduce rounding effects. I further transformed the data to ‘tidy data’ to make plotting and subsequent analysis easier.</p>
 <pre class="r"><code>top &lt;- 10
 
 data &lt;- data %&gt;%
@@ -263,28 +264,28 @@ damage &lt;- data %&gt;%
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
-<p>The goal of the investigation was to answer these two questions:</p>
+<p>In summary, the goal of the investigation was to answer these two questions:</p>
 <ol style="list-style-type: decimal">
 <li>Across the United States, which types of events are most harmful with respect to population health?</li>
 <li>Across the United States, which types of events have the greatest economic consequences?</li>
 </ol>
-<p>The answers to these two questions given the assumptions and the data analysis are:</p>
+<p>The answers to these two questions given my assumptions and analysis are:</p>
 <ol style="list-style-type: decimal">
-<li>Accross the United States, Hurricanes are the most harmfull with respect to population health.</li>
-<li>Accross the United States, Floods have the greatest economic consequences.</li>
+<li>Accross the United States, <em>tornados</em> are the most harmfull with respect to population health.</li>
+<li>Accross the United States, <em>floods</em> have the greatest economic consequences.</li>
 </ol>
 </div>
 <div id="further-work" class="section level2">
 <h2>Further Work</h2>
-<p>The investigation was constraigned by the requirements and time limits. In doing this investigation the following open questions ocurred to me and might be interesting engigh for furure analisies following on from this work:</p>
+<p>Unfortunately this investigation was constrained by the requirements and time limits. In doing this investigation the following open questions ocurred to me and might be interesting enough to warrant future analisis:</p>
 <ol style="list-style-type: decimal">
-<li>What is the progression over time for the events with the highest impact. We know that hurricanes has the higest impact on population health, but has this always been the case?</li>
-<li>Would the results of this study be diffrent if the values are infation/market adjusted?</li>
-<li>Is there any events that in aggregate terms has less impact but has a higher average and accure more frequently. This might indicate ‘low hanging fruit’ for event preperation.</li>
-<li>Is there a way to quantify injuries and fatalities sothat they can be added to the economic loss of property and crop in order to get a better economic impact.</li>
-<li>Is the impact of events localised in terms of economic and population healt impact?</li>
+<li>What is the progression over time for the events with the highest impact? We know that tornados have the highest impact on population health, but has this always been the case?</li>
+<li>Would the results of this study be different if the values are inflation/market adjusted?</li>
+<li>Are there any events that in aggregate have less impact but have a higher average and occur more frequently? This might indicate ‘low hanging fruit’ for event preparation.</li>
+<li>How can we quantify injuries and fatalities so that they can be added to the economic loss of property and crops, in order to get a better economic impact?</li>
+<li>Is the impact of events localised in terms of economic and population health impact?</li>
 </ol>
-<p>These are but a few of the questions that popped into my head while doing this investigation. I am looking forward to answering some of the above questions and in ansering them generating a whole herd of new questions.</p>
+<p>These are but a few of the questions that popped into my mind while doing this investigation. I am looking forward to answering some of the above questions, and in answering them generating a whole bunch of new questions.</p>
 </div>
 
 
