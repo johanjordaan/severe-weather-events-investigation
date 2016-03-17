@@ -11,7 +11,13 @@ This investigation aimed to answer the following two questions:
 The data used comes from the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database and can be found [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
 
 ## Assumptions 
-I assumed the American definition for a billion, which is a thousand million.
+I made some assumption in the investigation in order to answer the questions. The following list enumerates these assumptions:
+
+* I assumed the American definition for a billion, which is a thousand million.
+* I assumed that 'harmful with respect to population health' is measured by number of injuries and fatalities. 
+* I assumed that 'have the greatest economic consequences' is measured by the damage to propery and crops and not include harmful efects on population healt.
+* I have excluded any kind of normilisation of values to account for inflation.
+* The analsysis has been done on the aggregate data in the database stretching from 1950 to 2011. 
 
 ## Data Processing
 
@@ -43,11 +49,19 @@ sum(is.na(data$EVTYPE))
 
 
 ####Injury/Fatality Data Quality
-The FATALITIES and INJURIES variables contained no NA values and required no cleanup.
+The FATALITIES and INJURIES variables contained no NA or negative values and required no cleanup.
 
 
 ```r
 sum(is.na(data$FATALITIES))
+```
+
+```
+## [1] 0
+```
+
+```r
+sum(data$FATALITIES<0)
 ```
 
 ```
@@ -62,8 +76,18 @@ sum(is.na(data$INJURIES))
 ## [1] 0
 ```
 
+```r
+sum(data$INJURIES<0)
+```
+
+```
+## [1] 0
+```
+
 
 ####Property Damage Data Quality
+The PROPDMG variable contained no NA or negative values and required no cleanup.
+
 
 ```r
 sum(is.na(data$PROPDMG))
@@ -73,7 +97,15 @@ sum(is.na(data$PROPDMG))
 ## [1] 0
 ```
 
-The PROPDMG variable contained no NA values and required no cleanup.
+```r
+sum(data$PROPDMG<0)
+```
+
+```
+## [1] 0
+```
+
+The PROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
 
 
 ```r
@@ -88,9 +120,9 @@ table(data$PROPDMGEXP)
 ##      5      1      8     40      6 424665  11330      1      7
 ```
 
-The PROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
-
 ####Crop Damage Data Quality
+The CROPDMG variable contained no NA or negative values and required no cleanup.
+
 
 ```r
 sum(is.na(data$CROPDMG))
@@ -100,7 +132,15 @@ sum(is.na(data$CROPDMG))
 ## [1] 0
 ```
 
-The CROPDMG variable contained no NA values and required no cleanup.
+```r
+sum(data$CROPDMG<0)
+```
+
+```
+## [1] 0
+```
+
+The CROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
 
 
 ```r
@@ -112,8 +152,6 @@ table(data$CROPDMGEXP)
 ##             0      2      ?      B      K      M      k      m 
 ## 618413     19      1      7      9 281832   1994     21      1
 ```
-
-The CROPDMGEXP variable should have only contained K(Thousands), M(Millions) and B(Billions) values. Since it contained other values this series nedded to be cleaned.
 
 ### Data Cleanup and Enhancement
 
@@ -219,7 +257,8 @@ ggplot(health,aes(reorder(EVTYPE,-VALUE),VALUE,color=TYPE,group=TYPE)) +
   geom_point() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   xlab("Event Type") +
-  ylab("Event Impact - Individuals") 
+  ylab("Event Impact - Individuals") +
+  ggtitle("Population health impact of the worst weather events in the United States")
 ```
 
 ![](README_files/figure-html/graph_health-1.png)
@@ -232,7 +271,8 @@ ggplot(damage,aes(reorder(EVTYPE,-VALUE),VALUE,color=TYPE,group=TYPE)) +
   geom_point() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   xlab("Event Type") +
-  ylab("Event Impact - Billion $") 
+  ylab("Event Impact - Billion $") +
+  ggtitle("Economic impact of the worst weather events in the United States")
 ```
 
 ![](README_files/figure-html/graph_damage-1.png)
@@ -251,6 +291,18 @@ The answers to these two questions given the assumptions and the data analysis a
 
 
 ## Further Work
+
+The investigation was constraigned by the requirements and time limits. In doing this investigation the following open questions ocurred to me and might be interesting engigh for furure analisies following on from this work:
+
+1. What is the progression over time for the events with the highest impact. We know that hurricanes has the higest impact on population health, but has this always been the case?
+2. Would the results of this study be diffrent if the values are infation/market adjusted?
+3. Is there any events that in aggregate terms has less impact but has a higher average and accure more frequently. This might indicate 'low hanging fruit' for event preperation.
+4. Is there a way to quantify injuries and fatalities sothat they can be added to the economic loss of property and crop in order to get a better economic impact.
+5. Is the impact of events localised in terms of economic and population healt impact?
+
+These are but a few of the questions that popped into my head while doing this investigation. I am looking forward to answering some of the above questions and in ansering them generating a whole herd of new questions.
+
+
 
 
 
