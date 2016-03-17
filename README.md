@@ -1,4 +1,4 @@
-# Severe Weather Events Investigation
+# Severe Weather Events Investigation - Economic and Health Impact
 Johan Jordaan  
 16 March 2016  
 

@@ -1,0 +1,7 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/161860/74f4f6a7288148de86952c5551e62772
+bundleId: https://api.rpubs.com/api/v1/document/161860/74f4f6a7288148de86952c5551e62772
+url: http://rpubs.com/Johan_Jordaan/161860
+when: 1458244431.71063
